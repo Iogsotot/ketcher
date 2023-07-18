@@ -126,7 +126,7 @@ class ReAtom extends ReObject {
 
   drawHover(render: Render) {
     const ret = this.makeHoverPlate(render);
-    render.ctab.addReObjectPath(LayerMap.hovering, this.visel, ret);
+    render.ctab.addReObjectPath(LayerMap.atom, this.visel, ret);
     return ret;
   }
 
@@ -317,7 +317,7 @@ class ReAtom extends ReObject {
 
     this.hydrogenOnTheLeft = setHydrogenPos(restruct.molecule, this);
     this.showLabel = isLabelVisible(restruct, render.options, this);
-    this.color = 'black'; // reset colour
+    this.color = 'black'; // reset color
 
     let delta;
     let rightMargin;
@@ -648,8 +648,6 @@ function shouldDisplayStereoLabel(
 }
 
 function isLabelVisible(restruct, options, atom) {
-  const isAttachmentPointAtom = atom.a.attpnt != null;
-  const isCarbon = atom.a.label.toLowerCase() === 'c';
   const visibleTerminal =
     options.showHydrogenLabels !== ShowHydrogenLabels.Off &&
     options.showHydrogenLabels !== ShowHydrogenLabels.Hetero;
@@ -657,10 +655,6 @@ function isLabelVisible(restruct, options, atom) {
   const neighborsLength =
     atom.a.neighbors.length === 0 ||
     (atom.a.neighbors.length < 2 && visibleTerminal);
-
-  if (isAttachmentPointAtom && isCarbon) {
-    return false;
-  }
 
   const shouldBeVisible =
     neighborsLength ||
@@ -1160,17 +1154,10 @@ function getAttachmentDirectionForOnlyOneBond(
   struct: Struct,
 ): Vec2 {
   const DEGREE_120_FOR_ONE_BOND = (2 * Math.PI) / 3;
-  const DEGREE_180_FOR_TRIPLE_BOND = Math.PI;
   const onlyNeighbor = atom.a.neighbors[0];
   // eslint-disable-next-line  @typescript-eslint/no-non-null-assertion
-  const neighbour = struct.halfBonds.get(onlyNeighbor)!;
-  const angle = neighbour.ang;
-  const isTripleBond =
-    struct.bonds.get(neighbour.bid)?.type === Bond.PATTERN.TYPE.TRIPLE;
-  const finalAngle =
-    angle +
-    (isTripleBond ? DEGREE_180_FOR_TRIPLE_BOND : DEGREE_120_FOR_ONE_BOND);
-  return newVectorFromAngle(finalAngle);
+  const angle = struct.halfBonds.get(onlyNeighbor)!.ang;
+  return newVectorFromAngle(angle + DEGREE_120_FOR_ONE_BOND);
 }
 
 function trisectionLargestSector(atom: ReAtom, struct: Struct): [Vec2, Vec2] {
